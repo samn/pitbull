@@ -1,0 +1,16 @@
+package Test;
+option java_package = "com.samn";
+
+message Foo {
+    message Bar {
+        message Baz {
+            optional string baz = 1;
+        }
+        repeated Baz bazs = 1;
+    }
+
+    optional string sattr = 1;
+    optional uint64 iattr = 2;
+    optional uint32 iiattr = 3;
+    optional Bar bar = 4;
+}
