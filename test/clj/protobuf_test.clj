@@ -45,7 +45,7 @@
     ;(get-in p-m ["bar" "bazs"]) => (get-in m ["bar" "bazs"])))
 
 (let [p-m (map->ProtobufMap com.samn.Test$Foo {})]
-  (fact "map->ProtobufMap throws an exception when trying to assoc/dissoc
-        a field that doesnt exist on the protobuf definition."
+  (fact "map->ProtobufMap throws an exception on invalid fields"
     (dissoc p-m "dogs") => (throws IllegalArgumentException)
-    (assoc p-m "dogs" "yes") => (throws IllegalArgumentException)))
+    (assoc p-m "dogs" "yes") => (throws IllegalArgumentException)
+    (map->ProtobufMap com.samn.Test$Foo {"dogs" "yes"}) => (throws IllegalArgumentException)))

@@ -14,8 +14,8 @@
       flatten))
 
 (defn- throw-invalid-field
-  [^Message message field-name]
-  (let [message-name (.. message (getDescriptorForType) (getFullName))
+  [message-or-builder field-name]
+  (let [message-name (.. message-or-builder (getDescriptorForType) (getFullName))
         error (str "No Field named " field-name "found on Protocol Buffer Message of type " message-name)]
     (throw (IllegalArgumentException. error))))
 
@@ -65,7 +65,7 @@
     raw-value))
 
 (defn set-on-builder!
-  [^Message$Builder builder field value]
+  [^Message$Builder builder ^Descriptors$FieldDescriptor field value]
   (let [converted-value (convert-value builder field value)]
     (if (repeated-field? field)
       (doseq [v (as-seq converted-value)]
@@ -80,7 +80,9 @@
   (let [descriptor (.getDescriptorForType builder)]
     (doseq [[k v] m]
       (let [field (.findFieldByName descriptor k)]
-        (set-on-builder! builder field v)))
+        (if field
+          (set-on-builder! builder field v)
+          (throw-invalid-field builder k))))
     (.build builder)))
 
 ;; TODO field name conversion
