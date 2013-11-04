@@ -1,6 +1,6 @@
-(defproject protobuf "0.1.0-SNAPSHOT"
+(defproject pitbull "0.1.0-SNAPSHOT"
   :description "Clojure Protocol Buffers"
-  :url ""
+  :url "https://github.com/samn/pitbull"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :test-paths ["test/clj"]

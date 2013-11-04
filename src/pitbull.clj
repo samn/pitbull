@@ -1,4 +1,6 @@
-(ns protobuf
+(ns pitbull
+  "Wrap Protocol Buffers Messages as Maps.
+  Convert Maps to Protocol Buffer Messages."
   (:import [com.google.protobuf
               Descriptors$FieldDescriptor
               Descriptors$FieldDescriptor$JavaType

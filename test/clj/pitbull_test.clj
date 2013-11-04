@@ -1,9 +1,9 @@
-(ns protobuf-test
-  (:require [protobuf :refer :all]
+(ns pitbull-test
+  (:require [pitbull :refer :all]
             [midje.sweet :refer :all]
             [midje.util :refer [expose-testables]]))
 
-(expose-testables protobuf)
+(expose-testables pitbull)
 
 (def foo-descriptor (com.samn.Test$Foo/getDescriptor))
 (def bar-descriptor (.getMessageType (.findFieldByName foo-descriptor "bar")))
@@ -28,7 +28,7 @@
 
 (let [m (load-protobuf com.samn.Test$Foo (java.io.FileInputStream. "test/resources/serialized/test1"))] 
   (fact "load-protobuf returns a ProtobufMap"
-    (class m) => protobuf.ProtobufMap)
+    (class m) => pitbull.ProtobufMap)
   (fact "assoc"
     (get (assoc m "iattr" 2) "iattr")  => 2)
   (fact "dissoc"

@@ -1,6 +1,8 @@
-# protobuf
+# pitbull
 
-A Clojure library designed to ... well, that part is up to you.
+Clojure Protocol Buffers
+
+This is very alpha right now.
 
 ## Usage
 
