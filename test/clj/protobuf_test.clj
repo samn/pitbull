@@ -1,6 +1,9 @@
 (ns protobuf-test
   (:require [protobuf :refer :all]
-            [midje.sweet :refer :all]))
+            [midje.sweet :refer :all]
+            [midje.util :refer [expose-testables]]))
+
+(expose-testables protobuf)
 
 (def foo-descriptor (com.samn.Test$Foo/getDescriptor))
 (def bar-descriptor (.getMessageType (.findFieldByName foo-descriptor "bar")))
