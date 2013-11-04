@@ -31,7 +31,11 @@
   (fact "dissoc"
     (get (dissoc m "iattr") "iattr")  => 0)
   (fact "nested messages"
-    (get-in (assoc m "bar" {"bazs" [{"baz" "hi"}]}) ["bar" "bazs"]) => [{"baz" "hi"}]))
+    (get-in (assoc m "bar" {"bazs" [{"baz" "hi"}]}) ["bar" "bazs"]) => [{"baz" "hi"}])
+  (fact "keywords or strings can be used as keys"
+    (:iattr m) => 1
+    (:sattr (assoc m :sattr "dogs")) => "dogs"
+    (:iattr (dissoc m :iattr)) => 0))
 
 (let [m {"iattr" 350
           "sattr" "lock ness"

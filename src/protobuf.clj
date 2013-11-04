@@ -6,12 +6,9 @@
               Message$Builder])
   (:require [potemkin :refer [def-map-type]]))
 
-(defn as-seq
-  "Returns a flat seq with o as its contents."
-  [o]
-  (-> o
-      vector
-      flatten))
+(def ^:private as-seq 
+  "Function. Returns a flat seq with its argument as the contents."
+  (comp flatten vector))
 
 (defn- throw-invalid-field
   [message-or-builder field-name]
@@ -72,7 +69,6 @@
         (.addRepeatedField builder field v))
       (.setField builder field converted-value))))
 
-; TODO field name conversion
 (defn map->message
   "Fills the values in Map m into Protobuf Builder builder.
   Returns a com.google.protobuf.Message."
@@ -85,11 +81,10 @@
           (throw-invalid-field builder k))))
     (.build builder)))
 
-;; TODO field name conversion
-;; for now this assumes that themap keys are the same as the field names
 (def-map-type ProtobufMap [m]
   (get [_ k default-value]
-    (let [field (find-field m k)
+    (let [field-name (name k)
+          field (find-field m field-name)
           ;; getField returns the value, or a List of messages if a repeated field
           value (.getField m field)]
       (if value
@@ -99,21 +94,23 @@
           :else value)
         default-value)))
   (assoc [_ k v]
-    (let [builder (.toBuilder m)
-          field (find-field m k)]
+    (let [field-name (name k)
+          builder (.toBuilder m)
+          field (find-field m field-name)]
       (if field
         (do
           (set-on-builder! builder field v)
           (ProtobufMap. (.build builder)))
-        (throw-invalid-field m k))))
+        (throw-invalid-field m field-name))))
   (dissoc [_ k]
-    (let [builder (.toBuilder m)
-          field (find-field m k)]
+    (let [field-name (name k)
+          builder (.toBuilder m)
+          field (find-field m field-name)]
       (if field
         (do
           (.clearField builder field)
           (ProtobufMap. (.build builder)))
-        (throw-invalid-field m k))))
+        (throw-invalid-field m field-name))))
   (keys [_]
     (map #(.getName %) (.getFields (.getDescriptorForType m))))
   ProtobufMessageWrapper
