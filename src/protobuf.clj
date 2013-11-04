@@ -35,11 +35,6 @@
 (defprotocol ProtobufMessageWrapper
   (get-message [_]))
 
-;; TODO unused? remove?
-(defn get-descriptor
-  [^Class klass]
-  (clojure.lang.Reflector/invokeStaticMethod klass "getDescriptor" (to-array [])))
-
 (defn ^Message$Builder new-builder
   [^Class klass]
   (clojure.lang.Reflector/invokeStaticMethod klass "newBuilder" (to-array [])))
@@ -75,13 +70,17 @@
   [^Message$Builder builder m]
   (let [descriptor (.getDescriptorForType builder)]
     (doseq [[k v] m]
-      (let [field (.findFieldByName descriptor k)]
+      (let [field-name (name k)
+            field (.findFieldByName descriptor field-name)]
         (if field
           (set-on-builder! builder field v)
-          (throw-invalid-field builder k))))
+          (throw-invalid-field builder field-name))))
     (.build builder)))
 
-(def-map-type ProtobufMap [m]
+;; The ProtobufMap constructor shouldn't be used directly and is considered an implementation detail.
+;; Use map->ProtobufMap to construct a ProtobufMap from a map with a specified protobuf definition.
+;; Use message->ProtobufMap to construct a ProtobufMap that wraps a protobuf Message instance.
+(def-map-type ProtobufMap [m meta-map]
   (get [_ k default-value]
     (let [field-name (name k)
           field (find-field m field-name)
@@ -89,44 +88,51 @@
           value (.getField m field)]
       (if value
         (cond
-          (repeated-field? field) (map #(ProtobufMap. %) value)
-          (message-field? field) (ProtobufMap. value)
+          (repeated-field? field) (map #(ProtobufMap. % meta-map) value)
+          (message-field? field) (ProtobufMap. value meta-map)
           :else value)
         default-value)))
   (assoc [_ k v]
     (let [field-name (name k)
-          builder (.toBuilder m)
           field (find-field m field-name)]
       (if field
-        (do
+        (let [builder (.toBuilder m)]
           (set-on-builder! builder field v)
-          (ProtobufMap. (.build builder)))
+          (ProtobufMap. (.build builder) meta-map))
         (throw-invalid-field m field-name))))
   (dissoc [_ k]
     (let [field-name (name k)
-          builder (.toBuilder m)
           field (find-field m field-name)]
       (if field
-        (do
+        (let [builder (.toBuilder m)]
           (.clearField builder field)
-          (ProtobufMap. (.build builder)))
+          (ProtobufMap. (.build builder) meta-map))
         (throw-invalid-field m field-name))))
   (keys [_]
     (map #(.getName %) (.getFields (.getDescriptorForType m))))
   ProtobufMessageWrapper
-  (get-message [_] m))
+  (get-message [_] m)
+  clojure.lang.IObj
+  (withMeta [this meta]
+    (ProtobufMap. m meta))
+  (meta [this]
+    meta-map))
+
+(defn message->ProtobufMap
+  [^Message message]
+  (ProtobufMap. message nil))
 
 (defn map->ProtobufMap
   [message-class m]
   (let [builder (new-builder message-class)
         message (map->message builder m)]
-    (ProtobufMap. (.build builder))))
+    (ProtobufMap. (.build builder) nil)))
 
 (defn load-protobuf
   [^Class klass ^java.io.InputStream input-stream]
   (let [args (to-array [input-stream])
         message (clojure.lang.Reflector/invokeStaticMethod klass "parseFrom" args)]
-    (ProtobufMap. message)))
+    (ProtobufMap. message nil)))
 
 (extend-type Message
   ProtobufMessageWrapper

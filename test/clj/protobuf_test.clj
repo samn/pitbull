@@ -44,11 +44,13 @@
   (fact "map->ProtobufMap creates a ProtobufMap"
     (get p-m "iattr") => (get m "iattr")
     (get p-m "sattr") => (get m "sattr")
-    (-> p-m (get "bar") (get "bazs") first) => (-> m (get "bar") (get "bazs") first)
-        ))
-    ;(get-in p-m ["bar" "bazs"]) => (get-in m ["bar" "bazs"])))
+    (get-in p-m ["bar" "bazs"]) => (get-in m ["bar" "bazs"])))
 
-(let [p-m (map->ProtobufMap com.samn.Test$Foo {})]
+(let [m {:sattr "s" "iattr" 1 :bar {:bazs [{:baz "hi"}]}}]
+  (fact "map->ProtobufMap works with mixed keys"
+    (map->ProtobufMap com.samn.Test$Foo m) =not=> (throws Exception)))
+
+(let [p-m (map->ProtobufMap com.samn.Test$Foo {:sattr "s"})]
   (fact "map->ProtobufMap throws an exception on invalid fields"
     (dissoc p-m "dogs") => (throws IllegalArgumentException)
     (assoc p-m "dogs" "yes") => (throws IllegalArgumentException)
