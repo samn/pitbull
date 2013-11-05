@@ -58,3 +58,5 @@
     (dissoc p-m "dogs") => (throws IllegalArgumentException)
     (assoc p-m "dogs" "yes") => (throws IllegalArgumentException)
     (map->ProtobufMap com.samn.Test$Foo {"dogs" "yes"}) => (throws IllegalArgumentException)))
+
+(future-fact "serialize-to-bytes")

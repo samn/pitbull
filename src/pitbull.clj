@@ -10,7 +10,7 @@
 
 ;;;; Private Functions
 
-(def ^:private as-seq 
+(def ^{:private true} as-seq 
   "Function. Returns a flat seq with its argument as the contents."
   (comp flatten vector))
 
@@ -42,12 +42,12 @@
   ProtobufMessageWrapper
   (get-message [this] this))
 
-(defn ^Message$Builder new-builder
+(defn- ^Message$Builder new-builder
   "Instantiates & returns a new Message$Builder for the Class klass."
   [^Class klass]
   (clojure.lang.Reflector/invokeStaticMethod klass "newBuilder" (to-array [])))
 
-(defn ^Descriptors$FieldDescriptor find-field
+(defn- ^Descriptors$FieldDescriptor find-field
   "Find and returns the FieldDescriptor for field-name on Message message.
   Returns nil if no field with that name exists."
   [^Message message field-name]
@@ -170,7 +170,11 @@
   (let [protobuf-message (get-message m)]
     (.writeTo protobuf-message output-stream)))
 
-(defn serialize-to-byte-stream
-  "Serializes a com.google.protobuf.Message or ProtobufMap into a ByteArrayOutputStream."
+(defn serialize-to-bytes
+  "Serializes a com.google.protobuf.Message or ProtobufMap into a byte array"
   [m]
-  (serialize-to m (java.io.ByteArrayOutputStream.)))
+  (let [byte-array-output-stream (java.io.ByteArrayOutputStream.)]
+    (serialize-to m byte-array-output-stream)
+    (.toByteArray byte-array-output-stream)))
+
+;; TODO serialize-map-to, convenience func to convert a Map to a ProtobufMap and serialize
