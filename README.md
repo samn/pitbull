@@ -6,7 +6,7 @@ This is very alpha right now.
 
 ## Usage
 
-FIXME
+See [the docs](https://github.com/samn/pitbull/blob/master/doc/intro.md)
 
 ## License
 
