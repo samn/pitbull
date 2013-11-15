@@ -1,4 +1,4 @@
-(defproject pitbull "0.1.0-SNAPSHOT"
+(defproject pitbull "0.1.0"
   :description "Clojure Protocol Buffers"
   :url "https://github.com/samn/pitbull"
   :license {:name "Eclipse Public License"
