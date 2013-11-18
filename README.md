@@ -43,6 +43,8 @@ You can create a new wrapped `Pets$Bear` instance from a regular `Map`:
 	(def bear-protobuf-map (pb/map->ProtobufMap Pets$Bear bear-map))
 	
 	(:name bear-protobuf-map) ; => "yogi"
+	;; fields can be accessed using String or Keyword keys
+	(get bear-protobuf-map "hungry") ; => true
 	
 A `ProtobufMap` will throw an `IllegalArgumentException` if a key that doesn't exist on the Protobuf definition is added:
 
