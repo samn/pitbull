@@ -4,5 +4,4 @@ script: lein2 with-profile dev:1.4 midje
 jdk:
     - openjdk7
     - openjdk6
-    - oraclejdk6
     - oraclejdk7

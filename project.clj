@@ -7,7 +7,7 @@
   :java-source-paths ["test/java"]
   :jar-exclusions [#"test/"]
   :uberjar-exclusions [#"test/"]
-  :profiles {:dev {:dependencies [[org.clojure/clojure "1.5.1"]]}
+  :profiles {:dev {:dependencies [[org.clojure/clojure "1.5.1"]] :plugins [[lein-midje "3.1.1"]]}
             :1.4 {:dependencies [[org.clojure/clojure "1.4.0"]]}}
   :dependencies [[com.google.protobuf/protobuf-java "2.5.0"]
                  [potemkin "0.3.4"]
