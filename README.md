@@ -69,6 +69,11 @@ Or even a Map directly to a byte-array (or vice versa):
 		 (pb/map->proto-bytes Pets$Bear)
 		 (bytes->ProtobufMap Pets$Bear))
 
+## Build Status
+
+[![Travis CI](https://api.travis-ci.org/samn/pitbull.png)](https://travis-ci.org/samn/pitbull)
+
+
 ## [Pitbulls](https://en.wikipedia.org/wiki/Pitbull) 
 
 are the best kind of dog.  If you could be a good guardian you should consider adopting one.
