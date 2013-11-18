@@ -60,6 +60,12 @@ You can serialize a `ProtobufMap` to a given `OutputStream`
 A convenience function is provided to serialize directly to a byte array:
 
 	(pb/serialize-to-bytes bear-protobuf-map)
+	
+Or even a Map directly to a byte-array (or vice versa):
+
+	(->> {:name "Misha"}
+		 (pb/map->proto-bytes Pets$Bear)
+		 (bytes->ProtobufMap Pets$Bear))
 
 ## [Pitbulls](https://en.wikipedia.org/wiki/Pitbull) 
 

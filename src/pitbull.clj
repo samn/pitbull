@@ -17,7 +17,7 @@
 (defn- throw-invalid-field
   [message-or-builder field-name]
   (let [message-name (.. message-or-builder (getDescriptorForType) (getFullName))
-        error (str "No Field named " field-name "found on Protocol Buffer Message of type " message-name)]
+        error (str "No Field named " field-name " found on Protocol Buffer Message of type " message-name)]
     (throw (IllegalArgumentException. error))))
 
 (defn- ^{:testable true} repeated-field?
@@ -164,6 +164,13 @@
         message (clojure.lang.Reflector/invokeStaticMethod klass "parseFrom" args)]
     (ProtobufMap. message nil)))
 
+(defn bytes->ProtobufMap
+  "Deserialize a byte array containing a serialized Protobuf Message of type
+  klass and wrap in a ProtobufMap."
+  [^Class klass protobuf-bytes]
+  (let [input-stream (java.io.ByteArrayInputStream. protobuf-bytes)]
+    (load-protobuf klass input-stream)))
+
 (defn serialize-to
   "Serialize Message or ProtobufMap m and write it to OutputStream output-stream."
   [m ^java.io.OutputStream output-stream]
@@ -173,8 +180,18 @@
 (defn serialize-to-bytes
   "Serializes a com.google.protobuf.Message or ProtobufMap into a byte array"
   [m]
-  (let [byte-array-output-stream (java.io.ByteArrayOutputStream.)]
-    (serialize-to m byte-array-output-stream)
-    (.toByteArray byte-array-output-stream)))
+  (let [output-stream (java.io.ByteArrayOutputStream.)]
+    (serialize-to m output-stream)
+    (.toByteArray output-stream)))
 
-;; TODO serialize-map-to, convenience func to convert a Map to a ProtobufMap and serialize
+(defn serialize-map
+  "Serialize Map m as a Protobuf of type klass to OutputStream output-stream."
+  [^Class klass m ^java.io.OutputStream output-stream]
+  (let [protobuf-map (map->ProtobufMap klass m)]
+    (serialize-to protobuf-map output-stream)))
+
+(defn map->proto-bytes
+  "Serialize Map m as a Protobuf of Class klass."
+  [^Class klass m]
+  (let [protobuf-map (map->ProtobufMap klass m)]
+    (serialize-to-bytes protobuf-map)))
