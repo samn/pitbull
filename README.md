@@ -81,6 +81,6 @@ are the best kind of dog.  If you could be a good guardian you should consider a
 
 ## License
 
-Copyright © 2013 FIXME
+Copyright © 2013 @samn
 
 Distributed under the Eclipse Public License, the same as Clojure.
