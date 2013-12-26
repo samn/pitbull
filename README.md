@@ -15,7 +15,7 @@ is a wrapper around Protocol Buffer objects that exposes an `IPersistentMap`-lik
 pitbull is available on [Clojars](https://clojars.org/pitbull).
 
 
-	[pitbull "0.1.0"]
+	[pitbull "0.1.1"]
 
 
 ## Usage
@@ -49,6 +49,10 @@ You can create a new wrapped `Pets$Bear` instance from a regular `Map`:
 A `ProtobufMap` will throw an `IllegalArgumentException` if a key that doesn't exist on the Protobuf definition is added:
 
 	(assoc bear-protobuf-map :color "brown") ; => IllegalArgumentException
+	
+or if a key that isn't present on the protobuf definition is read:
+
+	(get bear-protobuf-map "dogs") ; => IllegalArgumentException
 
 An Exception will be thrown if you try to create a `ProtobufMap` with an invalid key, or if a required field is missing:
 
