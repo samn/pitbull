@@ -22,18 +22,16 @@
 
 (defn- ^{:testable true} repeated-field?
   [^Descriptors$FieldDescriptor field-descriptor]
-  (if (instance? Descriptors$FieldDescriptor field-descriptor)
-    (.isRepeated field-descriptor)
-    false))
+  (and (instance? Descriptors$FieldDescriptor field-descriptor)
+       (.isRepeated field-descriptor)))
 
 (defn- ^{:testable true} message-field?
   "Returns true if field-descriptor describes a message field.
   NOTE: repeated fields of a message will have the java type of message
   need to explicitly check if a field is repeated with `repeated-field?`."
   [^Descriptors$FieldDescriptor field-descriptor]
-  (if (instance? Descriptors$FieldDescriptor field-descriptor)
-    (= Descriptors$FieldDescriptor$JavaType/MESSAGE (.getJavaType field-descriptor))
-    false))
+  (and (instance? Descriptors$FieldDescriptor field-descriptor)
+       (= Descriptors$FieldDescriptor$JavaType/MESSAGE (.getJavaType field-descriptor))))
 
 (defprotocol ProtobufMessageWrapper
   (get-message [_]))
@@ -54,7 +52,7 @@
   (let [descriptor (.getDescriptorForType message)
         field (.findFieldByName descriptor field-name)]
     (if (nil? field)
-      (throw (IllegalArgumentException. (str "No field with name " field-name " found on message with type " (class message))))
+      (throw-invalid-field message field-name)
       field)))
 
 (declare map->message)
@@ -118,20 +116,16 @@
         default-value)))
   (assoc [_ k v]
     (let [field-name (name k)
-          field (find-field m field-name)]
-      (if field
-        (let [builder (.toBuilder m)]
-          (set-on-builder! builder field v)
-          (ProtobufMap. (.build builder) meta-map))
-        (throw-invalid-field m field-name))))
+          field (find-field m field-name)
+          builder (.toBuilder m)]
+      (set-on-builder! builder field v)
+      (ProtobufMap. (.build builder) meta-map)))
   (dissoc [_ k]
     (let [field-name (name k)
-          field (find-field m field-name)]
-      (if field
-        (let [builder (.toBuilder m)]
-          (.clearField builder field)
-          (ProtobufMap. (.build builder) meta-map))
-        (throw-invalid-field m field-name))))
+          field (find-field m field-name)
+          builder (.toBuilder m)]
+      (.clearField builder field)
+      (ProtobufMap. (.build builder) meta-map)))
   (keys [_]
     (map #(.getName %) (.getFields (.getDescriptorForType m))))
   ProtobufMessageWrapper
