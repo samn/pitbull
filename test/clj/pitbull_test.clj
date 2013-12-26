@@ -39,7 +39,11 @@
   (fact "keywords or strings can be used as keys"
     (:iattr m) => 1
     (:sattr (assoc m :sattr "dogs")) => "dogs"
-    (:iattr (dissoc m :iattr)) => 0))
+    (:iattr (dissoc m :iattr)) => 0)
+  (fact "get, assoc, & dissoc throw an exception for keys that aren't present on the protobuf"
+    (get m "invalid") => (throws IllegalArgumentException)
+    (assoc m "invalid" 1) => (throws IllegalArgumentException)
+    (dissoc m "invalid") => (throws IllegalArgumentException)))
 
 (let [m {"iattr" 350
           "sattr" "lock ness"

@@ -51,8 +51,11 @@
   "Find and returns the FieldDescriptor for field-name on Message message.
   Returns nil if no field with that name exists."
   [^Message message field-name]
-  (let [descriptor (.getDescriptorForType message)]
-    (.findFieldByName descriptor field-name)))
+  (let [descriptor (.getDescriptorForType message)
+        field (.findFieldByName descriptor field-name)]
+    (if (nil? field)
+      (throw (IllegalArgumentException. (str "No field with name " field-name " found on message with type " (class message))))
+      field)))
 
 (declare map->message)
 
