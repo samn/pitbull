@@ -15,7 +15,7 @@
   "Function. Returns a flat seq with its argument as the contents."
   (comp flatten vector))
 
-(defn- throw-invalid-field
+(defn throw-invalid-field
   [^MessageOrBuilder message-or-builder field-name]
   (let [message-name (.. message-or-builder (getDescriptorForType) (getFullName))
         error (str "No Field named " field-name " found on Protocol Buffer Message of type " message-name)]
@@ -107,6 +107,68 @@
           (throw-invalid-field builder field-name))))
     (.build builder)))
 
+;; TODO this doesn't work with nil or empty Strings
+(defn- ^:testable snake->camel
+  "Convert a snake-cased string to camel case."
+  [s]
+  (let [parts (clojure.string/split s #"_")]
+    (->> parts
+        (map (fn [[first & rest]]
+               (apply str (list* (Character/toUpperCase first) rest))))
+         (clojure.string/join ""))))
+
+(defn- getter-name
+  "Return the name of the method to retrieve the value for the field described
+  by field-descriptor. Handles repeated fields & binary strings appropriately."
+  [field-descriptor]
+  (let [field-name (snake->camel (.getName field-descriptor))]
+    (cond
+      (.isRepeated field-descriptor) (str ".get" field-name "List")
+      (= (.getJavaType field-descriptor) Descriptors$FieldDescriptor$JavaType/BYTE_STRING) (str ".get" field-name "Bytes")
+      :else (str ".get" field-name))))
+
+(defn- generate-getter-call
+  "Emits the syntax for a getter call site.
+  Is a Map with the following keys:
+  * value: the value for field-descriptor on message
+  * repeated?: true if this is a repeated field
+  * message?: true if this field is a Message."
+  [message field-descriptor]
+  `{:value (~(symbol (getter-name field-descriptor)) ~message)
+    :repeated? ~(repeated-field? field-descriptor)
+    :message? ~(message-field? field-descriptor)})
+
+(defn- generate-getter-dispatch
+  "Emit a pair of :field-name getter-call-syntax."
+  [message field-descriptor]
+  `(~(keyword (.getName field-descriptor)) ~(generate-getter-call message field-descriptor)))
+
+(defn descriptor
+  [message-class]
+  (clojure.lang.Reflector/invokeStaticMethod message-class "getDescriptor" (to-array [])))
+
+;; this is a fn + eval not a macro because the value of message-class is needed eaglery.
+(defn generate-getter
+  [message-class]
+  (let [fields (.getFields (descriptor message-class))
+        dispatch (mapcat (partial generate-getter-dispatch 'message) fields)]
+    (eval `(fn ~(symbol (str message-class "-getter"))
+             [~'message ~'field-name]
+             (condp = (keyword ~'field-name)
+               ~@dispatch
+               :else (throw-invalid-field ~'message ~'field-name))))))
+
+(def getter-fn
+  (memoize 
+    (fn getter-fn-inner
+      [message-class]
+      (generate-getter message-class))))
+
+(defn get-field
+  [message field-name]
+  (let [getter (getter-fn (class message))]
+    (getter message (keyword field-name))))
+
 ;;;; Data Types
 
 ;;;; The ProtobufMap constructor shouldn't be used directly and is considered an implementation detail.
@@ -114,14 +176,11 @@
 ;;;; Use message->ProtobufMap to construct a ProtobufMap that wraps a protobuf Message instance.
 (def-map-type ProtobufMap [^Message m meta-map]
   (get [_ k default-value]
-    (let [field-name (name k)
-          field (find-field m field-name)
-          ;; getField returns the value, or a List of messages if a repeated field
-          value (.getField m field)]
+    (let [{:keys [value repeated? message?]} (get-field m k)]
       (if value
         (cond
-          (and (repeated-field? field) (message-field? field)) (map #(ProtobufMap. % meta-map) value)
-          (message-field? field) (ProtobufMap. value meta-map)
+          (and repeated? message?) (map #(ProtobufMap. % meta-map) value)
+          message? (ProtobufMap. value meta-map)
           :else value)
         default-value)))
   (assoc [_ k v]

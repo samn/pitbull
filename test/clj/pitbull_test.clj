@@ -6,6 +6,21 @@
 
 (expose-testables pitbull)
 
+(tabular
+  (fact "snake->camel"
+    (snake->camel ?snake) => ?camel)
+  ?snake        ?camel
+  "foo"         "Foo"
+  "foO_bar"     "FoOBar"
+  "dog_breath"  "DogBreath"
+  "DogBreath"   "DogBreath")
+
+
+(require '[clojure.pprint :refer [pprint]])
+(pprint (generate-getter Test$Foo))
+(prn ((generate-getter Test$Foo) (get-message (map->ProtobufMap Test$Foo {:sattr "hi"})) :sattr))
+
+
 (def foo-descriptor (Test$Foo/getDescriptor))
 (def bar-descriptor (.getMessageType (.findFieldByName foo-descriptor "bar")))
 
