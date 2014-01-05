@@ -2,6 +2,7 @@
   "Wrap Protocol Buffers Messages as Maps.
   Convert Maps to Protocol Buffer Messages."
   (:import [com.google.protobuf
+              Descriptors$Descriptor
               Descriptors$FieldDescriptor
               Descriptors$FieldDescriptor$JavaType
               Message
@@ -113,14 +114,14 @@
   [s]
   (let [parts (clojure.string/split s #"_")]
     (->> parts
-        (map (fn [[first & rest]]
+        (map (fn [[^Character first & rest]]
                (apply str (list* (Character/toUpperCase first) rest))))
          (clojure.string/join ""))))
 
 (defn- getter-name
   "Return the name of the method to retrieve the value for the field described
   by field-descriptor. Handles repeated fields & binary strings appropriately."
-  [field-descriptor]
+  [^Descriptors$FieldDescriptor field-descriptor]
   (let [field-name (snake->camel (.getName field-descriptor))]
     (cond
       (.isRepeated field-descriptor) (str ".get" field-name "List")
@@ -133,27 +134,29 @@
   * value: the value for field-descriptor on message
   * repeated?: true if this is a repeated field
   * message?: true if this field is a Message."
-  [message field-descriptor]
+  [^Message message ^Descriptors$FieldDescriptor field-descriptor]
   `{:value (~(symbol (getter-name field-descriptor)) ~message)
     :repeated? ~(repeated-field? field-descriptor)
     :message? ~(message-field? field-descriptor)})
 
 (defn- generate-getter-dispatch
   "Emit a pair of :field-name getter-call-syntax."
-  [message field-descriptor]
+  [^Message message ^Descriptors$FieldDescriptor field-descriptor]
   `(~(keyword (.getName field-descriptor)) ~(generate-getter-call message field-descriptor)))
 
-(defn descriptor
-  [message-class]
+(defn ^Descriptors$Descriptor descriptor
+  [^Class message-class]
   (clojure.lang.Reflector/invokeStaticMethod message-class "getDescriptor" (to-array [])))
 
 ;; this is a fn + eval not a macro because the value of message-class is needed eaglery.
 (defn generate-getter
-  [message-class]
+  [^Class message-class]
   (let [fields (.getFields (descriptor message-class))
-        dispatch (mapcat (partial generate-getter-dispatch 'message) fields)]
-    (eval `(fn ~(symbol (str message-class "-getter"))
-             [~'message ~'field-name]
+        dispatch (mapcat (partial generate-getter-dispatch 'message) fields)
+        class-name (.getName message-class)
+        tagged-message (vary-meta 'message assoc :tag (symbol class-name))]
+    (eval `(fn ~(symbol (str class-name "-getter"))
+             [~tagged-message ~'field-name]
              (condp = (keyword ~'field-name)
                ~@dispatch
                :else (throw-invalid-field ~'message ~'field-name))))))
@@ -161,13 +164,13 @@
 (def getter-fn
   (memoize 
     (fn getter-fn-inner
-      [message-class]
+      [^Class message-class]
       (generate-getter message-class))))
 
 (defn get-field
-  [message field-name]
+  [^Message message field-name]
   (let [getter (getter-fn (class message))]
-    (getter message (keyword field-name))))
+    (getter message field-name)))
 
 ;;;; Data Types
 

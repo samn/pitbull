@@ -16,9 +16,10 @@
   "DogBreath"   "DogBreath")
 
 
+(set! *print-meta* true)
 (require '[clojure.pprint :refer [pprint]])
 (pprint (generate-getter Test$Foo))
-(prn ((generate-getter Test$Foo) (get-message (map->ProtobufMap Test$Foo {:sattr "hi"})) :sattr))
+;(prn ((generate-getter Test$Foo) (get-message (map->ProtobufMap Test$Foo {:sattr "hi"})) :sattr))
 
 
 (def foo-descriptor (Test$Foo/getDescriptor))
