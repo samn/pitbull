@@ -3,6 +3,7 @@
 ### Next Release
 
 * Added a simple performance test comparing ProtobufMap against a Map literal & Protocol Buffers Message.
+* Performance improvements.
 
 ### Version 0.1.1
 
