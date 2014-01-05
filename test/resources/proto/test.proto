@@ -11,6 +11,6 @@ message Foo {
 
     required string sattr = 1;
     optional uint64 iattr = 2;
-    optional uint32 iiattr = 3;
+    repeated uint32 iiattr = 3;
     optional Bar bar = 4;
 }

@@ -36,15 +36,19 @@ public final class Test {
      */
     long getIattr();
 
-    // optional uint32 iiattr = 3;
+    // repeated uint32 iiattr = 3;
     /**
-     * <code>optional uint32 iiattr = 3;</code>
+     * <code>repeated uint32 iiattr = 3;</code>
      */
-    boolean hasIiattr();
+    java.util.List<java.lang.Integer> getIiattrList();
     /**
-     * <code>optional uint32 iiattr = 3;</code>
+     * <code>repeated uint32 iiattr = 3;</code>
      */
-    int getIiattr();
+    int getIiattrCount();
+    /**
+     * <code>repeated uint32 iiattr = 3;</code>
+     */
+    int getIiattr(int index);
 
     // optional .Test.Foo.Bar bar = 4;
     /**
@@ -122,13 +126,29 @@ public final class Test {
               break;
             }
             case 24: {
-              bitField0_ |= 0x00000004;
-              iiattr_ = input.readUInt32();
+              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+                iiattr_ = new java.util.ArrayList<java.lang.Integer>();
+                mutable_bitField0_ |= 0x00000004;
+              }
+              iiattr_.add(input.readUInt32());
+              break;
+            }
+            case 26: {
+              int length = input.readRawVarint32();
+              int limit = input.pushLimit(length);
+              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004) && input.getBytesUntilLimit() > 0) {
+                iiattr_ = new java.util.ArrayList<java.lang.Integer>();
+                mutable_bitField0_ |= 0x00000004;
+              }
+              while (input.getBytesUntilLimit() > 0) {
+                iiattr_.add(input.readUInt32());
+              }
+              input.popLimit(limit);
               break;
             }
             case 34: {
               com.samn.Test.Foo.Bar.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000008) == 0x00000008)) {
+              if (((bitField0_ & 0x00000004) == 0x00000004)) {
                 subBuilder = bar_.toBuilder();
               }
               bar_ = input.readMessage(com.samn.Test.Foo.Bar.PARSER, extensionRegistry);
@@ -136,7 +156,7 @@ public final class Test {
                 subBuilder.mergeFrom(bar_);
                 bar_ = subBuilder.buildPartial();
               }
-              bitField0_ |= 0x00000008;
+              bitField0_ |= 0x00000004;
               break;
             }
           }
@@ -147,6 +167,9 @@ public final class Test {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e.getMessage()).setUnfinishedMessage(this);
       } finally {
+        if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+          iiattr_ = java.util.Collections.unmodifiableList(iiattr_);
+        }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
       }
@@ -1383,20 +1406,27 @@ public final class Test {
       return iattr_;
     }
 
-    // optional uint32 iiattr = 3;
+    // repeated uint32 iiattr = 3;
     public static final int IIATTR_FIELD_NUMBER = 3;
-    private int iiattr_;
+    private java.util.List<java.lang.Integer> iiattr_;
     /**
-     * <code>optional uint32 iiattr = 3;</code>
+     * <code>repeated uint32 iiattr = 3;</code>
      */
-    public boolean hasIiattr() {
-      return ((bitField0_ & 0x00000004) == 0x00000004);
+    public java.util.List<java.lang.Integer>
+        getIiattrList() {
+      return iiattr_;
     }
     /**
-     * <code>optional uint32 iiattr = 3;</code>
+     * <code>repeated uint32 iiattr = 3;</code>
      */
-    public int getIiattr() {
-      return iiattr_;
+    public int getIiattrCount() {
+      return iiattr_.size();
+    }
+    /**
+     * <code>repeated uint32 iiattr = 3;</code>
+     */
+    public int getIiattr(int index) {
+      return iiattr_.get(index);
     }
 
     // optional .Test.Foo.Bar bar = 4;
@@ -1406,7 +1436,7 @@ public final class Test {
      * <code>optional .Test.Foo.Bar bar = 4;</code>
      */
     public boolean hasBar() {
-      return ((bitField0_ & 0x00000008) == 0x00000008);
+      return ((bitField0_ & 0x00000004) == 0x00000004);
     }
     /**
      * <code>optional .Test.Foo.Bar bar = 4;</code>
@@ -1424,7 +1454,7 @@ public final class Test {
     private void initFields() {
       sattr_ = "";
       iattr_ = 0L;
-      iiattr_ = 0;
+      iiattr_ = java.util.Collections.emptyList();
       bar_ = com.samn.Test.Foo.Bar.getDefaultInstance();
     }
     private byte memoizedIsInitialized = -1;
@@ -1449,10 +1479,10 @@ public final class Test {
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         output.writeUInt64(2, iattr_);
       }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeUInt32(3, iiattr_);
+      for (int i = 0; i < iiattr_.size(); i++) {
+        output.writeUInt32(3, iiattr_.get(i));
       }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
         output.writeMessage(4, bar_);
       }
       getUnknownFields().writeTo(output);
@@ -1472,11 +1502,16 @@ public final class Test {
         size += com.google.protobuf.CodedOutputStream
           .computeUInt64Size(2, iattr_);
       }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeUInt32Size(3, iiattr_);
+      {
+        int dataSize = 0;
+        for (int i = 0; i < iiattr_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeUInt32SizeNoTag(iiattr_.get(i));
+        }
+        size += dataSize;
+        size += 1 * getIiattrList().size();
       }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(4, bar_);
       }
@@ -1601,7 +1636,7 @@ public final class Test {
         bitField0_ = (bitField0_ & ~0x00000001);
         iattr_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000002);
-        iiattr_ = 0;
+        iiattr_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000004);
         if (barBuilder_ == null) {
           bar_ = com.samn.Test.Foo.Bar.getDefaultInstance();
@@ -1645,12 +1680,13 @@ public final class Test {
           to_bitField0_ |= 0x00000002;
         }
         result.iattr_ = iattr_;
-        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
-          to_bitField0_ |= 0x00000004;
+        if (((bitField0_ & 0x00000004) == 0x00000004)) {
+          iiattr_ = java.util.Collections.unmodifiableList(iiattr_);
+          bitField0_ = (bitField0_ & ~0x00000004);
         }
         result.iiattr_ = iiattr_;
         if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
-          to_bitField0_ |= 0x00000008;
+          to_bitField0_ |= 0x00000004;
         }
         if (barBuilder_ == null) {
           result.bar_ = bar_;
@@ -1681,8 +1717,15 @@ public final class Test {
         if (other.hasIattr()) {
           setIattr(other.getIattr());
         }
-        if (other.hasIiattr()) {
-          setIiattr(other.getIiattr());
+        if (!other.iiattr_.isEmpty()) {
+          if (iiattr_.isEmpty()) {
+            iiattr_ = other.iiattr_;
+            bitField0_ = (bitField0_ & ~0x00000004);
+          } else {
+            ensureIiattrIsMutable();
+            iiattr_.addAll(other.iiattr_);
+          }
+          onChanged();
         }
         if (other.hasBar()) {
           mergeBar(other.getBar());
@@ -1825,35 +1868,68 @@ public final class Test {
         return this;
       }
 
-      // optional uint32 iiattr = 3;
-      private int iiattr_ ;
-      /**
-       * <code>optional uint32 iiattr = 3;</code>
-       */
-      public boolean hasIiattr() {
-        return ((bitField0_ & 0x00000004) == 0x00000004);
+      // repeated uint32 iiattr = 3;
+      private java.util.List<java.lang.Integer> iiattr_ = java.util.Collections.emptyList();
+      private void ensureIiattrIsMutable() {
+        if (!((bitField0_ & 0x00000004) == 0x00000004)) {
+          iiattr_ = new java.util.ArrayList<java.lang.Integer>(iiattr_);
+          bitField0_ |= 0x00000004;
+         }
       }
       /**
-       * <code>optional uint32 iiattr = 3;</code>
+       * <code>repeated uint32 iiattr = 3;</code>
        */
-      public int getIiattr() {
-        return iiattr_;
+      public java.util.List<java.lang.Integer>
+          getIiattrList() {
+        return java.util.Collections.unmodifiableList(iiattr_);
       }
       /**
-       * <code>optional uint32 iiattr = 3;</code>
+       * <code>repeated uint32 iiattr = 3;</code>
        */
-      public Builder setIiattr(int value) {
-        bitField0_ |= 0x00000004;
-        iiattr_ = value;
+      public int getIiattrCount() {
+        return iiattr_.size();
+      }
+      /**
+       * <code>repeated uint32 iiattr = 3;</code>
+       */
+      public int getIiattr(int index) {
+        return iiattr_.get(index);
+      }
+      /**
+       * <code>repeated uint32 iiattr = 3;</code>
+       */
+      public Builder setIiattr(
+          int index, int value) {
+        ensureIiattrIsMutable();
+        iiattr_.set(index, value);
         onChanged();
         return this;
       }
       /**
-       * <code>optional uint32 iiattr = 3;</code>
+       * <code>repeated uint32 iiattr = 3;</code>
+       */
+      public Builder addIiattr(int value) {
+        ensureIiattrIsMutable();
+        iiattr_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated uint32 iiattr = 3;</code>
+       */
+      public Builder addAllIiattr(
+          java.lang.Iterable<? extends java.lang.Integer> values) {
+        ensureIiattrIsMutable();
+        super.addAll(values, iiattr_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated uint32 iiattr = 3;</code>
        */
       public Builder clearIiattr() {
+        iiattr_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000004);
-        iiattr_ = 0;
         onChanged();
         return this;
       }
@@ -2012,7 +2088,7 @@ public final class Test {
     java.lang.String[] descriptorData = {
       "\n\037test/resources/proto/test.proto\022\004Test\"" +
       "\213\001\n\003Foo\022\r\n\005sattr\030\001 \002(\t\022\r\n\005iattr\030\002 \001(\004\022\016\n" +
-      "\006iiattr\030\003 \001(\r\022\032\n\003bar\030\004 \001(\0132\r.Test.Foo.Ba" +
+      "\006iiattr\030\003 \003(\r\022\032\n\003bar\030\004 \001(\0132\r.Test.Foo.Ba" +
       "r\032:\n\003Bar\022\037\n\004bazs\030\001 \003(\0132\021.Test.Foo.Bar.Ba" +
       "z\032\022\n\003Baz\022\013\n\003baz\030\001 \001(\tB\n\n\010com.samn"
     };
