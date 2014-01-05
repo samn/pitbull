@@ -32,11 +32,20 @@
 
 (defn bench-pbuf-map
   []
-  (log-section "Benchmarking ProtobufMap access")
+  (log-section "Benchmarking ProtobufMap construction & access")
   (bench 
     (let [pb-map (map->ProtobufMap com.samn.Test$Foo {:iattr 350
                                                       :sattr "lock ness"
                                                       :bar {:bazs [{:baz "hi"} {:baz "ho"}]}})]
+      (-> pb-map :bar :bazs first :baz))))
+
+(defn bench-pbuf-map-access
+  []
+  (log-section "Benchmarking ProtobufMap access")
+  (let [pb-map (map->ProtobufMap com.samn.Test$Foo {:iattr 350
+                                                    :sattr "lock ness"
+                                                    :bar {:bazs [{:baz "hi"} {:baz "ho"}]}})]
+    (bench 
       (-> pb-map :bar :bazs first :baz))))
 
 ;; TODO bench raw protobuf operations similar to above
@@ -61,5 +70,6 @@
   [& args]
   (bench-raw-map)
   (bench-pbuf-map)
+  (bench-pbuf-map-access)
   (bench-load-pbufmap)
   (bench-load-pbuf))

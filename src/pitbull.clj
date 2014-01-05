@@ -5,7 +5,8 @@
               Descriptors$FieldDescriptor
               Descriptors$FieldDescriptor$JavaType
               Message
-              Message$Builder])
+              Message$Builder
+              MessageOrBuilder])
   (:require [potemkin :refer [def-map-type]]))
 
 ;;;; Private Functions
@@ -15,7 +16,7 @@
   (comp flatten vector))
 
 (defn- throw-invalid-field
-  [message-or-builder field-name]
+  [^MessageOrBuilder message-or-builder field-name]
   (let [message-name (.. message-or-builder (getDescriptorForType) (getFullName))
         error (str "No Field named " field-name " found on Protocol Buffer Message of type " message-name)]
     (throw (IllegalArgumentException. error))))
@@ -102,7 +103,7 @@
 ;;;; The ProtobufMap constructor shouldn't be used directly and is considered an implementation detail.
 ;;;; Use map->ProtobufMap to construct a ProtobufMap from a map with a specified protobuf definition.
 ;;;; Use message->ProtobufMap to construct a ProtobufMap that wraps a protobuf Message instance.
-(def-map-type ProtobufMap [m meta-map]
+(def-map-type ProtobufMap [^Message m meta-map]
   (get [_ k default-value]
     (let [field-name (name k)
           field (find-field m field-name)
@@ -127,7 +128,7 @@
       (.clearField builder field)
       (ProtobufMap. (.build builder) meta-map)))
   (keys [_]
-    (map #(.getName %) (.getFields (.getDescriptorForType m))))
+    (map #(.getName ^Descriptors$FieldDescriptor %) (.getFields (.getDescriptorForType m))))
   ProtobufMessageWrapper
   (get-message [_] m)
   clojure.lang.IObj
@@ -171,7 +172,7 @@
 (defn serialize-to
   "Serialize Message or ProtobufMap m and write it to OutputStream output-stream."
   [m ^java.io.OutputStream output-stream]
-  (let [protobuf-message (get-message m)]
+  (let [^Message protobuf-message (get-message m)]
     (.writeTo protobuf-message output-stream)))
 
 (defn serialize-to-bytes
