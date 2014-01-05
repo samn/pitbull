@@ -157,7 +157,7 @@
         tagged-message (vary-meta 'message assoc :tag (symbol class-name))]
     (eval `(fn ~(symbol (str class-name "-getter"))
              [~tagged-message ~'field-name]
-             (condp = (keyword ~'field-name)
+             (case (keyword ~'field-name)
                ~@dispatch
                :else (throw-invalid-field ~'message ~'field-name))))))
 
