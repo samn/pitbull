@@ -58,27 +58,31 @@
 
 (declare map->message)
 
+(defn- conversion-fn
+  "Returns a function that converts a raw value to the appropriate type
+  for the given field.  Returns identity if no conversion is needed."
+  [^Message$Builder builder ^Descriptors$FieldDescriptor field]
+  (cond
+    (message-field? field) #(map->message (.newBuilderForField builder field) %)
+    ;; Clojure treats numbers as Longs by default, so an explicit cast to Integer is needed
+    (= (.getJavaType field) Descriptors$FieldDescriptor$JavaType/INT) int
+    :else identity))
+
 (defn- convert-value
   "Convert raw-value to the type expected for the given field.
   If the field message field:
     raw-value is expected to be a Map and will be converted to a Message.
     the keys of the raw-value map will be used to find Fields on the Message.
+  If the field is an Int then raw-value is cast to an Integer
   If the field is repeated:
     a seq of raw-value (or the values in it if raw-value is iterable) will be returned.
-    if the field is also a Message field then the values of raw-value will be converted.
+    any above transformations will be applied to each repeated value.
   Otherwise no transformation is done and raw-value is returned."
   [^Message$Builder builder ^Descriptors$FieldDescriptor field raw-value]
-  (if (message-field? field)
+  (let [conversion-fn (conversion-fn builder field)]
     (if (repeated-field? field)
-      ;; TODO this always coerces the values for a repeated field into a seq, is that ok?
-      (map #(map->message (.newBuilderForField builder field) %) (as-seq raw-value))
-      (map->message (.newBuilderForField builder field) raw-value))
-    ;; Clojure treats numbers as Longs by default, so an explicit cast to Integer is needed
-    (if (= (.getJavaType field) Descriptors$FieldDescriptor$JavaType/INT)
-      (if (repeated-field? field)
-        (map int raw-value)
-        (int raw-value))
-      raw-value)))
+      (map conversion-fn raw-value)
+      (conversion-fn raw-value))))
 
 (defn- set-on-builder!
   "Sets the value for FieldDescriptor field on Message.Builder builder to be value.
