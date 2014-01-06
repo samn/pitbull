@@ -25,6 +25,7 @@
   (.findFieldByName foo-descriptor "bar")  false
   (.findFieldByName bar-descriptor "bazs")  true
   (.findFieldByName foo-descriptor "sattr")  false
+  (.findFieldByName foo-descriptor "iiattr")  true
   1  false)
 
 (let [m (load-protobuf Test$Foo (java.io.FileInputStream. "test/resources/serialized/test1"))] 
@@ -46,11 +47,13 @@
     (dissoc m "invalid") => (throws IllegalArgumentException)))
 
 (let [m {"iattr" 350
-          "sattr" "lock ness"
-          "bar" {"bazs" [{"baz" "hi"} {"baz" "ho"}]}}
+         "iiattr" [150 250 350]
+         "sattr" "lock ness"
+         "bar" {"bazs" [{"baz" "hi"} {"baz" "ho"}]}}
       p-m (map->ProtobufMap Test$Foo m)]
   (fact "map->ProtobufMap creates a ProtobufMap"
     (get p-m "iattr") => (get m "iattr")
+    (get p-m "iiattr") => (get m "iiattr")
     (get p-m "sattr") => (get m "sattr")
     (get-in p-m ["bar" "bazs"]) => (get-in m ["bar" "bazs"])))
 

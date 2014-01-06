@@ -67,13 +67,18 @@
     a seq of raw-value (or the values in it if raw-value is iterable) will be returned.
     if the field is also a Message field then the values of raw-value will be converted.
   Otherwise no transformation is done and raw-value is returned."
-  [^Message$Builder builder field raw-value]
+  [^Message$Builder builder ^Descriptors$FieldDescriptor field raw-value]
   (if (message-field? field)
     (if (repeated-field? field)
       ;; TODO this always coerces the values for a repeated field into a seq, is that ok?
       (map #(map->message (.newBuilderForField builder field) %) (as-seq raw-value))
       (map->message (.newBuilderForField builder field) raw-value))
-    raw-value))
+    ;; Clojure treats numbers as Longs by default, so an explicit cast to Integer is needed
+    (if (= (.getJavaType field) Descriptors$FieldDescriptor$JavaType/INT)
+      (if (repeated-field? field)
+        (map int raw-value)
+        (int raw-value))
+      raw-value)))
 
 (defn- set-on-builder!
   "Sets the value for FieldDescriptor field on Message.Builder builder to be value.
@@ -111,7 +116,7 @@
           value (.getField m field)]
       (if value
         (cond
-          (repeated-field? field) (map #(ProtobufMap. % meta-map) value)
+          (and (repeated-field? field) (message-field? field)) (map #(ProtobufMap. % meta-map) value)
           (message-field? field) (ProtobufMap. value meta-map)
           :else value)
         default-value)))
