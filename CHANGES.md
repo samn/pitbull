@@ -1,6 +1,6 @@
 # pitbull
 
-### Next Release
+### Version 0.1.2
 
 * Added a simple performance test comparing ProtobufMap against a Map literal & Protocol Buffers Message.
 * Fixed a problem that prevented repeated fields of primitive (non-Message) values from working.
