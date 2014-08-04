@@ -11,7 +11,7 @@
 
 ;;;; Private Functions
 
-(def ^{:private true} as-seq 
+(def ^{:private true} as-seq
   "Function. Returns a flat seq with its argument as the contents."
   (comp flatten vector))
 

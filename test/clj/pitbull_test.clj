@@ -1,3 +1,4 @@
+(set! *warn-on-reflection* true)
 (ns pitbull-test
   (:import [com.samn Test$Foo])
   (:require [pitbull :refer :all]
