@@ -15,7 +15,7 @@ is a wrapper around Protocol Buffer objects that exposes an `IPersistentMap`-lik
 pitbull is available on [Clojars](https://clojars.org/pitbull).
 
 
-	[pitbull "0.1.1"]
+	[pitbull "0.1.3"]
 
 
 ## Usage

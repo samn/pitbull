@@ -1,4 +1,4 @@
-(defproject pitbull "0.1.3-SNAPSHOT"
+(defproject pitbull "0.1.3"
   :description "A Map like Clojure API for Protocol Buffers"
   :url "https://github.com/samn/pitbull"
   :license {:name "Eclipse Public License"
